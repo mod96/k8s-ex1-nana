@@ -82,6 +82,11 @@ OUT:
 🎉  Opening service default/webapp-service in default browser...
 ❗  Because you are using a Docker driver on windows, the terminal needs to be open to run it.
 ```
+or, in [k8s tutotial](https://kubernetes.io/ko/docs/tutorials/kubernetes-basics/explore/explore-intro/) they say
+```
+kubectl proxy
+```
+will do that.
 
 
 ## Restarting
