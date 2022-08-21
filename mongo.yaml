@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  labels:
+    app: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo # pod with label 'app: mongo' belongs to this deployment
+  template: # pod configuration
+    metadata:
+      labels:
+        app: mongo # replicas have common label 'app: mongo' but unique names s.t. mongo-1, mongo-2, ...
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:5.0
+          ports:
+            - containerPort: 27017
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret # metadata name from mongo-secret.yaml
+                  key: mongo-user
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret # metadata name from mongo-secret.yaml
+                  key: mongo-password
+
+--- # using "---", can have multiple YAML configurations within 1 file
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+spec:
+  selector:
+    app: mongo # this will bind 'app: mongo' pods to this service.
+  ports:
+    - protocol: TCP
+      # abstracted service port, which can be any port other pods use to acces the service
+      port: 27017 # service port (internal) wonder why changing this makes app to crash????
+      targetPort: 27017 # container port of deployment

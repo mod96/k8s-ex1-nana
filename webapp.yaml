@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-deployment
+  labels:
+    app: webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp # pod with label 'app: webapp' belongs to this deployment
+  template: # pod configuration
+    metadata:
+      labels:
+        app: webapp # replicas have common label 'app: webapp' but unique names s.t. webapp-1, webapp-2, ...
+    spec:
+      containers:
+        - name: webapp
+          image: mod96/nana-test:v1.0.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: USER_NAME # nana made web-app to use env variable
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret # metadata name from mongo-secret.yaml
+                  key: mongo-user
+            - name: USER_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret # metadata name from mongo-secret.yaml
+                  key: mongo-password
+            - name: DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-config # metadata name from mongo-config.yaml
+                  key: mongo-url
+--- # using "---", can have multiple YAML configurations within 1 file
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service
+spec:
+  type: NodePort # make it possible to access from outside, default=ClusterIP which is an internal service
+  selector:
+    app: webapp # this will bind 'app: webapp' pods to this service.
+  ports:
+    - protocol: TCP
+      # Inside the cluster, what port does the service expose?
+      port: 3000 # service port (frontend)
+      # Which port do pods selected by this service expose?
+      targetPort: 3000 # container port of deployment
+      nodePort: 30100 # exposes the Service on each Node's IP at a static port -> <NodeIP>:<NodePort>, 30000 ~ 32767
