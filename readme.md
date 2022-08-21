@@ -45,7 +45,7 @@ kubectl logs $(kubectl get pod | findstr webapp | awk '{print $1}')
 ```
 but of course, you need to install awk (maybe using chocolatery)
 
-# Accessing
+## Accessing
 NodePort Service is accessible on each Worker Node's IP address
 
 and since we're using minikube (1 machine), 
@@ -84,13 +84,13 @@ OUT:
 ```
 
 
-# Restarting
+## Restarting
 [Link](https://linuxhint.com/kubectl-restart-the-pod/)
 ```
 kubectl rollout restart deployment <deployment name>
 ```
 
-# Wonder why changing service port crashes app.
+## Wonder why changing service port crashes app.
 full error message:
 ```
 main page requested, mongo url is: mongo-service
